@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 import { registerValidation } from "../utils/validation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -9,6 +10,8 @@ interface JoiResponse {
   error: Joi.ValidationError | undefined;
   value: RegisterData | undefined;
 }
+
+const prisma = new PrismaClient();
 
 export const registerUser = async (req: Request, res: Response) => {
   const { error, value }: JoiResponse = registerValidation(req.body);
@@ -22,13 +25,16 @@ export const registerUser = async (req: Request, res: Response) => {
   //search if the mail exist in db
 
   try {
+    const userExist = await prisma.user.findUnique({
+      where: { mail: value?.mail },
+    });
     // const emailExist = await User.findOne({ where: { mail: value?.mail! } });
 
-    // if (emailExist) {
-    //   return res
-    //     .status(200)
-    //     .json({ success: false, message: "email already taken" });
-    // }
+    if (userExist) {
+      return res
+        .status(200)
+        .json({ success: false, message: "email already taken" });
+    }
 
     //hash password
 
@@ -37,21 +43,24 @@ export const registerUser = async (req: Request, res: Response) => {
 
     //save in db
 
-    // const savedUser = await User.create({
-    //   username: value?.username,
-    //   email: value?.mail,
-    //   password: hashedPassword,
-    // });
+    const savedUser = await prisma.user.create({
+      data: {
+        mail: value?.mail!,
+        password: hashedPassword,
+        username: value?.username!,
+      },
+    });
 
-    // const token = jwt.sign(
-    //   { id: savedUser.id, email: savedUser.mail },
-    //   process.env.JWT_SECRET!,
-    //   { expiresIn: "1d" }
-    // );
+    const token = jwt.sign(
+      { id: savedUser.id, email: savedUser.mail },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1d" }
+    );
 
     res.status(200).json({
       success: true,
       message: "user created",
+      token: token,
     });
   } catch (error) {
     res.status(400).json({
