@@ -4,7 +4,8 @@ import { registerValidation } from "../utils/validation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
-import { RegisterData, UserAtributes } from "../interface";
+import { RegisterData, ReqUser } from "../interface";
+import configs from "../config/default";
 
 interface JoiResponse {
   error: Joi.ValidationError | undefined;
@@ -12,6 +13,14 @@ interface JoiResponse {
 }
 
 const prisma = new PrismaClient();
+
+/**
+ *Endpoint for register users
+ *
+ * @param req
+ * @param res
+ * @returns Response{ success: boolean,message: string,token: string}
+ */
 
 export const registerUser = async (req: Request, res: Response) => {
   const { error, value }: JoiResponse = registerValidation(req.body);
@@ -52,8 +61,8 @@ export const registerUser = async (req: Request, res: Response) => {
     });
 
     const token = jwt.sign(
-      { id: savedUser.id, email: savedUser.mail },
-      process.env.JWT_SECRET!,
+      { id: savedUser.id, mail: savedUser.mail, username: savedUser.username },
+      configs.jwtSecret,
       { expiresIn: "1d" }
     );
 
@@ -70,20 +79,51 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-interface ReqUser extends Request {
-  user?: UserAtributes;
-}
+/**
+ *Endpoint for login users
+ *
+ * @param req
+ * @param res
+ * @returns Response{ success: boolean,token: string}
+ */
 
 export const loginUser = (req: ReqUser, res: Response) => {
   const { user } = req;
 
-  const secret = process.env.JWT_SECRET!;
-
-  const token = jwt.sign({ id: user?.id, mail: user?.mail }, secret, {
-    expiresIn: "1d",
-  });
+  const token = jwt.sign(
+    { id: user?.id, mail: user?.mail, username: user?.username },
+    configs.jwtSecret,
+    {
+      expiresIn: "1d",
+    }
+  );
   res.status(200).json({
     success: true,
     token,
   });
+};
+
+/**
+ *Endpoint for validating tokens
+ *
+ * @param req
+ * @param res
+ * @returns Response{ success: boolean,user:{}}
+ */
+
+export const validateUser = async (req: ReqUser, res: Response) => {
+  const { user } = req;
+
+  try {
+    console.log(user);
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(200).json({
+      success: false,
+      message: "user dont exist",
+    });
+  }
 };

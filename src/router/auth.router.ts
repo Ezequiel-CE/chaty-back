@@ -1,5 +1,9 @@
-import { Router, Request, Response } from "express";
-import { registerUser, loginUser } from "../controllers/auth.controllers";
+import { Router } from "express";
+import {
+  registerUser,
+  loginUser,
+  validateUser,
+} from "../controllers/auth.controllers";
 import passport from "passport";
 
 const authRouter: Router = Router();
@@ -10,6 +14,10 @@ authRouter.post(
   passport.authenticate("local", { session: false }),
   loginUser
 );
-authRouter.use("/isValid", (req: Request, res: Response) => {});
+authRouter.get(
+  "/validate",
+  passport.authenticate("jwt", { session: false }),
+  validateUser
+);
 
 export default authRouter;

@@ -1,11 +1,19 @@
 import passport from "passport";
 import passportLocal from "passport-local";
+import passporJwt from "passport-jwt";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { DatabaseUserAtributes, UserAtributes } from "../interface";
+import {
+  DatabaseUserAtributes,
+  UserAtributes,
+  PayloadAtributes,
+} from "../interface";
+import configs from "./default";
 
 const prisma = new PrismaClient();
 const LocalStrategy = passportLocal.Strategy;
+const JwtStrategy = passporJwt.Strategy;
+const ExtractJwt = passporJwt.ExtractJwt;
 
 /**
  * local strategy
@@ -56,4 +64,39 @@ passport.use(
       }
     }
   )
+);
+
+/**
+ * JWT strategy
+ *
+ * authorize users with token
+ */
+
+const options = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: configs.jwtSecret,
+};
+
+passport.use(
+  new JwtStrategy(options, async (payload: PayloadAtributes, done) => {
+    try {
+      const databaseUser = await prisma.user.findUnique({
+        where: { mail: payload.mail },
+      });
+
+      if (!databaseUser) {
+        return done(null, false);
+      }
+
+      const userInfo: UserAtributes = {
+        id: databaseUser.id,
+        mail: databaseUser.mail,
+        username: databaseUser.username,
+      };
+
+      done(null, userInfo);
+    } catch (error) {
+      done(error);
+    }
+  })
 );
