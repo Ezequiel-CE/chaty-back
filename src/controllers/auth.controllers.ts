@@ -4,7 +4,7 @@ import { registerValidation } from "../utils/validation";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
-import { RegisterData } from "../interface";
+import { RegisterData, UserAtributes } from "../interface";
 
 interface JoiResponse {
   error: Joi.ValidationError | undefined;
@@ -68,4 +68,22 @@ export const registerUser = async (req: Request, res: Response) => {
       message: "cant create user",
     });
   }
+};
+
+interface ReqUser extends Request {
+  user?: UserAtributes;
+}
+
+export const loginUser = (req: ReqUser, res: Response) => {
+  const { user } = req;
+
+  const secret = process.env.JWT_SECRET!;
+
+  const token = jwt.sign({ id: user?.id, mail: user?.mail }, secret, {
+    expiresIn: "1d",
+  });
+  res.status(200).json({
+    success: true,
+    token,
+  });
 };

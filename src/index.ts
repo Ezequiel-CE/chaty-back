@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import morgan from "morgan";
 import authRouter from "./router/auth.router";
+import passport from "passport";
 import "dotenv/config";
 
 const app: Application = express();
@@ -9,6 +10,8 @@ const app: Application = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
+app.use(passport.initialize());
+import "./config/passport";
 
 // routes
 
