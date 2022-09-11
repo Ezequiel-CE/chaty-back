@@ -100,6 +100,7 @@ export const loginUser = (req: ReqUser, res: Response) => {
   res.status(200).json({
     success: true,
     token,
+    user,
   });
 };
 
@@ -114,16 +115,8 @@ export const loginUser = (req: ReqUser, res: Response) => {
 export const validateUser = async (req: ReqUser, res: Response) => {
   const { user } = req;
 
-  try {
-    console.log(user);
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    res.status(200).json({
-      success: false,
-      message: "user dont exist",
-    });
-  }
+  res.status(200).json({
+    success: true,
+    user,
+  });
 };

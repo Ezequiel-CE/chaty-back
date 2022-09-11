@@ -3,11 +3,12 @@ import morgan from "morgan";
 import authRouter from "./router/auth.router";
 import passport from "passport";
 import configs from "./config/default";
+import cors from "cors";
 
 const app: Application = express();
 
 // middlewares
-
+app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(passport.initialize());
