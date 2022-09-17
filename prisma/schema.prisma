@@ -15,4 +15,12 @@ model User {
   mail String  @unique
   password  String@db.VarChar(1024)
   username String
+  rooms Room[]
 }
+
+model Room {
+  id    Int     @id @default(autoincrement())
+  name String  @unique @db.VarChar(50)
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id])
+  }

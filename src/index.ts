@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import morgan from "morgan";
 import authRouter from "./router/auth.router";
+import roomsRouter from "./router/room.router";
 import passport from "passport";
 import configs from "./config/default";
 import cors from "cors";
@@ -17,6 +18,7 @@ import "./config/passport";
 // routes
 
 app.use("/api/auth", authRouter);
+app.use("/api/rooms", roomsRouter);
 
 app.use("*", (req: Request, res: Response) => {
   return res.status(404).json({

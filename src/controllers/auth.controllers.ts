@@ -41,7 +41,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     if (userExist) {
       return res
-        .status(200)
+        .status(400)
         .json({ success: false, message: "email already taken" });
     }
 
@@ -60,15 +60,16 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    const token = jwt.sign(
-      { id: savedUser.id, mail: savedUser.mail, username: savedUser.username },
-      configs.jwtSecret,
-      { expiresIn: "1d" }
-    );
+    const userData = {
+      id: savedUser.id,
+      mail: savedUser.mail,
+      username: savedUser.username,
+    };
+    const token = jwt.sign(userData, configs.jwtSecret, { expiresIn: "1d" });
 
     res.status(200).json({
       success: true,
-      message: "user created",
+      user: userData,
       token: token,
     });
   } catch (error) {
