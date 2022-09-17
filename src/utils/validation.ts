@@ -10,4 +10,7 @@ export const registerValidation = (data: RegisterData) => {
   return schema.validate(data);
 };
 
-module.exports = { registerValidation };
+export const roomNameValidation = (name: string) => {
+  const mySchema = Joi.string().min(2).max(30).required();
+  return mySchema.validate(name);
+};

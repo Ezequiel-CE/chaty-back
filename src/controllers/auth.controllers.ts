@@ -6,13 +6,12 @@ import jwt from "jsonwebtoken";
 import Joi from "joi";
 import { RegisterData, ReqUser } from "../interface";
 import configs from "../config/default";
+import { prisma } from "../config/db";
 
 interface JoiResponse {
   error: Joi.ValidationError | undefined;
   value: RegisterData | undefined;
 }
-
-const prisma = new PrismaClient();
 
 /**
  *Endpoint for register users
