@@ -17,7 +17,7 @@ export const getAllRooms = (req: Request, res: Response) => {
 export const getRoom = (req: Request, res: Response) => {
   res.send("route for 1 room");
 };
-export const createRoom = async (req: ReqUser, res: Response) => {
+export const postRoom = async (req: ReqUser, res: Response) => {
   const name: string = req.body.name;
   console.log(req.user);
   const { error, value: roomName }: JoiResponse = roomNameValidation(name);
@@ -29,7 +29,7 @@ export const createRoom = async (req: ReqUser, res: Response) => {
   }
 
   const savedRoom = await prisma.room.create({
-    data: { name: roomName!, userId: req.user?.id! },
+    data: { name: roomName!, id_user: req.user?.id! },
   });
 
   res.status(200).json({ success: true, room: savedRoom });

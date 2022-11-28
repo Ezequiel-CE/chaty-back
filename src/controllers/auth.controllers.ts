@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { registerValidation } from "../utils/validation";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
 import { RegisterData, ReqUser } from "../interface";
 import configs from "../config/default";
-import { prisma } from "../config/db";
+import { registerUserService } from "../services/auth.services";
 
 interface JoiResponse {
   error: Joi.ValidationError | undefined;
@@ -30,51 +28,17 @@ export const registerUser = async (req: Request, res: Response) => {
       .json({ success: false, message: error.details[0].message });
   }
 
-  //search if the mail exist in db
-
   try {
-    const userExist = await prisma.user.findUnique({
-      where: { mail: value?.mail },
-    });
-    // const emailExist = await User.findOne({ where: { mail: value?.mail! } });
-
-    if (userExist) {
-      return res
-        .status(400)
-        .json({ success: false, message: "email already taken" });
-    }
-
-    //hash password
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(value?.password!, salt);
-
-    //save in db
-
-    const savedUser = await prisma.user.create({
-      data: {
-        mail: value?.mail!,
-        password: hashedPassword,
-        username: value?.username!,
-      },
-    });
-
-    const userData = {
-      id: savedUser.id,
-      mail: savedUser.mail,
-      username: savedUser.username,
-    };
-    const token = jwt.sign(userData, configs.jwtSecret, { expiresIn: "1d" });
+    const response = await registerUserService(value!);
 
     res.status(200).json({
       success: true,
-      user: userData,
-      token: token,
+      ...response,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: "cant create user",
+      message: error.message,
     });
   }
 };

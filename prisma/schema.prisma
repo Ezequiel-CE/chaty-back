@@ -21,6 +21,7 @@ model User {
 model Room {
   id    Int     @id @default(autoincrement())
   name String  @unique @db.VarChar(50)
-  userId   Int
-  user     User   @relation(fields: [userId], references: [id])
+  creation_date DateTime   @default(now())
+  id_user   Int
+  user     User   @relation(fields: [id_user], references: [id])
   }

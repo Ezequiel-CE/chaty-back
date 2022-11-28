@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   getAllRooms,
-  createRoom,
+  postRoom,
   getRoom,
 } from "../controllers/room.controllers";
 
@@ -24,7 +24,7 @@ roomsRouter.get(
 roomsRouter.post(
   "/",
   passport.authenticate("jwt", { session: false }),
-  createRoom
+  postRoom
 );
 
 export default roomsRouter;
